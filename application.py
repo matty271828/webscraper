@@ -1,47 +1,25 @@
+import requests, bs4
 from time import sleep, strftime
 from random import randint
-import pandas as pd
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-import smtplib
-from email.mime.multipart import MIMEMultipart
 import os
 
-# Change this to your own chromedriver path!
-chromedriver_path = os.environ.get("chromedriver_path")
-
-# This will open the Chrome window
-driver = webdriver.Chrome(executable_path=chromedriver_path) 
-sleep(2)
-
-def start_kayak(city_from, city_to, date_start, date_end):
+def contact_kayak(city_from, city_to, date_start, date_end):
     """City codes - it's the IATA codes!
     Date format -  YYYY-MM-DD"""
     # Contact Kayak
     try:
-        kayak = ('https://www.kayak.com/flights/' + city_from + '-' + city_to +
-                '/' + date_start + '-flexible/' + date_end + '-flexible?sort=bestflight_a')
-        driver.get(kayak)
-        print("Kayak successfully contacted")
-        sleep(randint(8,10))
-    except:
-        print("Error contacting Kayak")
-        return 0
+        url = ('https://www.kayak.com/flights/' + city_from + '-' + city_to + '/' + date_start + '-flexible/' + date_end + '-flexible?sort=bestflight_a')
+        response = requests.get(url)
+        response.raise_for_status()
+        print(f'Kayak successfully contacted: {response.status_code}')
 
-    # sometimes a popup shows up, so we can use a try statement to check it and close
-    try:
-        xp_popup_close = '//button[contains(@id,"dialog-close") and contains(@class,"Button-No-Standard-Style close")]'
-        driver.find_elements_by_xpath(xp_popup_close)[5].click()
-        print("popup closed")
-    except Exception as e:
-        pass
-
-    sleep(randint(1,5))
+    except requests.RequestException:
+        print(f'Site connection error: {response.status_code}')
+        return None
 
     print('starting first scrape.....')
-    df_flights_best = page_scrape()
-    print(df_flights_best)
-    sleep(randint(5,10))
+    soup = bs4.BeautifulSoup(response.text, features="html.parser")
+    return soup
 
 def page_scrape():
     """This function takes care of the scraping part"""
@@ -57,4 +35,4 @@ city_to = 'TLV'
 date_start = '2021-06-06'
 date_end = '2021-06-10'
 
-start_kayak(city_from, city_to, date_start, date_end)
+contact_kayak(city_from, city_to, date_start, date_end)
