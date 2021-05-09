@@ -30,7 +30,7 @@ def start_kayak(city_from, city_to, date_start, date_end):
 
     # sometimes a popup shows up, so we can use a try statement to check it and close
     try:
-        xp_popup_close = '//button[contains(@id,"dialog-close") and contains(@class,"Button-No-Standard-Style")]'
+        xp_popup_close = '//button[contains(@id,"dialog-close") and contains(@class,"Button-No-Standard-Style close")]'
         driver.find_elements_by_xpath(xp_popup_close)[5].click()
         print("popup closed")
     except Exception as e:
@@ -41,7 +41,7 @@ def start_kayak(city_from, city_to, date_start, date_end):
     print('starting first scrape.....')
     df_flights_best = page_scrape()
     print(df_flights_best)
-    sleep(randint(60,80))
+    sleep(randint(5,10))
 
 def page_scrape():
     """This function takes care of the scraping part"""
