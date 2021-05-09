@@ -17,12 +17,13 @@ def contact_kayak(city_from, city_to, date_start, date_end):
         print(f'Site connection error: {response.status_code}')
         return None
 
-    print('starting first scrape.....')
+    print('starting scrape.....')
     soup = bs4.BeautifulSoup(response.text, features="html.parser")
     return soup
 
-def page_scrape():
+def page_scrape(city_from, city_to, date_start, date_end):
     """This function takes care of the scraping part"""
+    soup = contact_kayak(city_from, city_to, date_start, date_end)
     return 1
 
 # city_from = input('From which city? ')
@@ -35,4 +36,4 @@ city_to = 'TLV'
 date_start = '2021-06-06'
 date_end = '2021-06-10'
 
-contact_kayak(city_from, city_to, date_start, date_end)
+page_scrape(city_from, city_to, date_start, date_end)
