@@ -22,13 +22,23 @@ def start_kayak(city_from, city_to, date_start, date_end):
         kayak = ('https://www.kayak.com/flights/' + city_from + '-' + city_to +
                 '/' + date_start + '-flexible/' + date_end + '-flexible?sort=bestflight_a')
         driver.get(kayak)
+        print("Kayak successfully contacted")
         sleep(randint(8,10))
     except:
         print("Error contacting Kayak")
         return 0
 
+    # sometimes a popup shows up, so we can use a try statement to check it and close
+    try:
+        xp_popup_close = '//button[contains(@id,"dialog-close") and contains(@class,"Button-No-Standard-Style close ")]'
+        driver.find_elements_by_xpath(xp_popup_close)[5].click()
+    except Exception as e:
+        pass
+    sleep(randint(1,5))
+
     print('starting first scrape.....')
     df_flights_best = page_scrape()
+    print(df_flights_best)
     sleep(randint(60,80))
 
 def page_scrape():
