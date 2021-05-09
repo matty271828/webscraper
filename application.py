@@ -1,7 +1,21 @@
 import requests, bs4
 from time import sleep, strftime
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 from random import randint
 import os
+
+# Change this to your own chromedriver path!
+chromedriver_path = os.environ.get("chromedriver_path")
+
+# Add options for webdriver
+options = webdriver.ChromeOptions()
+options.add_argument('--ignore-certificate-errors')
+options.add_argument('--incognito')
+options.add_argument('--headless')
+
+# Configure webdriver
+driver = webdriver.Chrome(chromedriver_path, options=options)
 
 def contact_kayak(city_from, city_to, date_start, date_end):
     """City codes - it's the IATA codes!
@@ -9,21 +23,28 @@ def contact_kayak(city_from, city_to, date_start, date_end):
     # Contact Kayak
     try:
         url = ('https://www.kayak.com/flights/' + city_from + '-' + city_to + '/' + date_start + '-flexible/' + date_end + '-flexible?sort=bestflight_a')
-        response = requests.get(url)
-        response.raise_for_status()
-        print(f'Kayak successfully contacted: {response.status_code}')
+        driver.get(url)
+        print("Kayak contacted...")
+        return driver.page_source
 
-    except requests.RequestException:
-        print(f'Site connection error: {response.status_code}')
+    except:
+        print("Error contacting Kayak")
         return None
-
-    print('starting scrape.....')
-    soup = bs4.BeautifulSoup(response.text, features="html.parser")
-    return soup
 
 def page_scrape(city_from, city_to, date_start, date_end):
     """This function takes care of the scraping part"""
-    soup = contact_kayak(city_from, city_to, date_start, date_end)
+    # Print statement to user
+    print('starting scrape.....')
+    
+    # Run contact_kayak to retrieve page source
+    page_source = contact_kayak(city_from, city_to, date_start, date_end)
+
+    soup = bs4.BeautifulSoup(page_source, features="html.parser")
+
+    print(soup)
+
+    prices = soup.find_all('span', class_="price-text")
+    print(prices)
     return 1
 
 # city_from = input('From which city? ')
