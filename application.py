@@ -12,7 +12,7 @@ chromedriver_path = os.environ.get("chromedriver_path")
 options = webdriver.ChromeOptions()
 options.add_argument('--ignore-certificate-errors')
 options.add_argument('--incognito')
-options.add_argument('--headless')
+#options.add_argument('--headless')
 
 # Configure webdriver
 driver = webdriver.Chrome(chromedriver_path, options=options)
@@ -25,6 +25,7 @@ def contact_kayak(city_from, city_to, date_start, date_end):
         url = ('https://www.kayak.com/flights/' + city_from + '-' + city_to + '/' + date_start + '-flexible/' + date_end + '-flexible?sort=bestflight_a')
         driver.get(url)
         print("Kayak contacted...")
+        sleep(5)
         return driver.page_source
 
     except:
@@ -41,10 +42,10 @@ def page_scrape(city_from, city_to, date_start, date_end):
 
     soup = bs4.BeautifulSoup(page_source, features="html.parser")
 
-    print(soup)
+    print(soup.body.div.div.main)
 
-    prices = soup.find_all('span', class_="price-text")
-    print(prices)
+    # prices = soup.find_all('ul', class_="_iaf _iai ")
+    #mprint(prices)
     return 1
 
 # city_from = input('From which city? ')
