@@ -1,51 +1,52 @@
-import requests, bs4
 from time import sleep, strftime
+from random import randint
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from random import randint
+import smtplib
+from email.mime.multipart import MIMEMultipart
 import os
 
 # Change this to your own chromedriver path!
 chromedriver_path = os.environ.get("chromedriver_path")
 
-# Add options for webdriver
-options = webdriver.ChromeOptions()
-options.add_argument('--ignore-certificate-errors')
-options.add_argument('--incognito')
-#options.add_argument('--headless')
+# This will open the Chrome window
+driver = webdriver.Chrome(executable_path=chromedriver_path) 
+sleep(2)
 
-# Configure webdriver
-driver = webdriver.Chrome(chromedriver_path, options=options)
-
-def contact_kayak(city_from, city_to, date_start, date_end):
+def start_kayak(city_from, city_to, date_start, date_end):
     """City codes - it's the IATA codes!
     Date format -  YYYY-MM-DD"""
     # Contact Kayak
     try:
-        url = ('https://www.kayak.com/flights/' + city_from + '-' + city_to + '/' + date_start + '-flexible/' + date_end + '-flexible?sort=bestflight_a')
-        driver.get(url)
-        print("Kayak contacted...")
-        sleep(5)
-        return driver.page_source
-
+        kayak = ('https://www.kayak.com/flights/' + city_from + '-' + city_to +
+                '/' + date_start + '-flexible/' + date_end + '-flexible?sort=bestflight_a')
+        driver.get(kayak)
+        print("Kayak successfully contacted, sleeping for 30s")
+        sleep(30)
     except:
         print("Error contacting Kayak")
-        return None
+        return 0
 
-def page_scrape(city_from, city_to, date_start, date_end):
+    # sometimes a popup shows up, so we can use a try statement to check it and close
+    try:
+        xp_popup_close = '//button[contains(@id,"dialog-close") and contains(@class,"Button-No-Standard-Style close ")]'
+        driver.find_elements_by_xpath(xp_popup_close)[5].click()
+        print("popup closed")
+    except Exception as e:
+        pass
+
+    print('starting first scrape.....')
+    df_flights_best = page_scrape()
+    print(df_flights_best)
+    sleep(randint(5,10))
+
+def page_scrape():
     """This function takes care of the scraping part"""
-    # Print statement to user
-    print('starting scrape.....')
-    
-    # Run contact_kayak to retrieve page source
-    page_source = contact_kayak(city_from, city_to, date_start, date_end)
 
-    soup = bs4.BeautifulSoup(page_source, features="html.parser")
+    cheap_results = '//a[@data-code="price"]'
+    driver.find_element_by_xpath(cheap_results).click()
+    print(cheap_results)
 
-    print(soup.body.div.div.main)
-
-    # prices = soup.find_all('ul', class_="_iaf _iai ")
-    #mprint(prices)
     return 1
 
 # city_from = input('From which city? ')
@@ -58,4 +59,4 @@ city_to = 'TLV'
 date_start = '2021-06-06'
 date_end = '2021-06-10'
 
-page_scrape(city_from, city_to, date_start, date_end)
+start_kayak(city_from, city_to, date_start, date_end)
